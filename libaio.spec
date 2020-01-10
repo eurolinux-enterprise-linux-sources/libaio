@@ -1,13 +1,14 @@
 Name: libaio
 Version: 0.3.109
-Release: 12%{?dist}
+Release: 13%{?dist}
 Summary: Linux-native asynchronous I/O access library
 License: LGPLv2+
 Group:  System Environment/Libraries
 Source: http://git.fedorahosted.org/cgit/libaio.git/snapshot/%{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-root
 Patch1: libaio-install-to-slash.patch
-Patch2: libaio-sparc.patch
+Patch2: libaio-add-arm64-support.patch
+Patch3: libaio-arm64-fix-test-case-16.patch
 
 %description
 The Linux-native asynchronous I/O facility ("async I/O", or "aio") has a
@@ -31,9 +32,12 @@ for the Linux-native asynchronous I/O facility ("async I/O", or "aio").
 
 %prep
 %setup -a 0
-%patch1 -p1
+%patch1 -p1 -b .install-to-slash
+%patch2 -p0 -b .add-arm64-support
+%patch2 -p1 -b .add-arm64-support
+%patch3 -p0 -b .arm64-fix-testcase-16
+%patch3 -p1 -b .arm64-fix-testcase-16
 mv %{name}-%{version} compat-%{name}-%{version}
-%patch2 -p1
 
 %build
 # A library with a soname of 1.0.0 was inadvertantly released.  This
@@ -73,6 +77,18 @@ make destdir=$RPM_BUILD_ROOT prefix=/ libdir=%{libdir} usrlibdir=%{usrlibdir} \
 %exclude %{_libdir}/libaio.a
 
 %changelog
+* Fri Aug 29 2014 Jeff Moyer <jmoyer@redhat.com> 0.3.109-13
+- Merge aarch64 branch into the main tree
+- Resolves: bz#1026429
+
+* Thu Mar 13 2014 Jeff Moyer <jmoyer@redhat.com> - 0.3.109-12.2
+- Get rid of sparc support (we don't build it) (Jeff Moyer)
+- Implement proper support for aarch64 (Jeff Moyer)
+- Resolves: bz#1026429
+
+* Tue Feb 4 2014 Brendan Conoboy <blc@redhat.com> - 0.3.109-12.1
+- Marcin's initial aarch64 compatibility patch.
+
 * Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 0.3.109-12
 - Mass rebuild 2014-01-24
 
